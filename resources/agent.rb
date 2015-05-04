@@ -1,4 +1,4 @@
-# A user & db user set up to allow scp'ing xxx.sql.zip files in and loading to db
+# defaults to match previous implementation of mysql logrotation
 actions :create
 default_action :create
 
