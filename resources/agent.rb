@@ -3,13 +3,13 @@ actions :create
 default_action :create
 
 # matches instance name of mysql_service
-attribute :name, kind_of: String, name_attribute: true
-attribute :mysql_password, kind_of: String, required: true
-attribute :connection, kind_of: Hash, required: true
+property :name, String, name_property: true
+property :mysql_password, String, required: true
+property :connection, Hash, required: true
 # logrotate options.  see logrotate_app docs for details
-attribute :rotate, kind_of: Integer, required: false, default: 7
-attribute :frequency, kind_of: String, required: false, default: 'daily'
-attribute :dateformat, kind_of: String, required: false, default: nil
-attribute :size, kind_of: String, required: false, default: nil
-attribute :maxsize, kind_of: String, required: false, default: nil
-attribute :logrotate_options, kind_of: Array, required: false, default: ['missingok', 'compress']
+property :rotate, Integer, required: false, default: 7
+property :frequency, String, required: false, default: 'daily'
+property :dateformat, [String, nil], required: false, default: nil
+property :size, [String, nil], required: false, default: nil
+property :maxsize, [String, nil], required: false, default: nil
+property :logrotate_options, Array, required: false, default: ['missingok', 'compress']

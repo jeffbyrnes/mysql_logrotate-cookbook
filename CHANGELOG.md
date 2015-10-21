@@ -7,7 +7,6 @@ This file is used to list changes made in each version of the mysql_logrotate co
 -----
 - Initial commit (previous commits destroyed, deemed dangerous and misleding.)
 
-- - -
-Check the [Markdown Syntax Guide](http://daringfireball.net/projects/markdown/syntax) for help with Markdown.
-
-The [Github Flavored Markdown page](http://github.github.com/github-flavored-markdown/) describes the differences between markdown on github and standard markdown.
+0.2.1
+-----
+- Updated resources file for new LWRP structure, replacing attributes with properties
