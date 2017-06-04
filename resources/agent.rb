@@ -14,6 +14,8 @@ property :maxsize,           [String, nil], default: nil
 property :logrotate_options, Array,         default: %w(missingok compress sharedscripts)
 
 action :create do
+  mysql2_chef_gem 'default'
+
   mysql_database_user "logrotator for #{new_resource.name}" do
     connection new_resource.connection
     username   'logrotator'
@@ -70,6 +72,8 @@ end
 
 # untested !!!
 action :delete do
+  mysql2_chef_gem 'default'
+
   mysql_database_user "logrotator for #{new_resource.name}" do
     ignore_failure true
     action         :drop
