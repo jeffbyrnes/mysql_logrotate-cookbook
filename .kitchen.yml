@@ -11,5 +11,5 @@ platforms:
 suites:
   - name: default
     run_list:
-      - recipe[mysql_logrotate::default]
+      - recipe[mysql_logrotate_test::default]
     attributes:
