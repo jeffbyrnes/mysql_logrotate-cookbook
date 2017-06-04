@@ -1,7 +1,5 @@
-require_relative '../spec_helper'
+require 'spec_helper'
 
-describe 'mysql_logrotate::default' do
-
-  it "is a no-op."
-
+describe 'jb_mysql_logrotate::default' do
+  it 'is a no-op.'
 end

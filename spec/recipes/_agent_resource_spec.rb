@@ -1,4 +1,4 @@
-require_relative "../spec_helper"
+require 'spec_helper'
 
 describe "mysql_logrotate::_agent_resource" do
 
