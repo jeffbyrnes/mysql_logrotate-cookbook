@@ -11,7 +11,7 @@ property :frequency,         String,        default: 'daily'
 property :dateformat,        [String, nil], default: nil
 property :size,              [String, nil], default: nil
 property :maxsize,           [String, nil], default: nil
-property :logrotate_options, Array,         default: %w(missingok compress)
+property :logrotate_options, Array,         default: %w(missingok compress sharedscripts)
 
 action :create do
   mysql_database_user "logrotator for #{new_resource.name}" do
@@ -32,16 +32,23 @@ action :create do
               host:     '127.0.0.1' # always local
   end
 
+  # Specifying sharedscripts as a property of logrotate_app is deprecated,
+  #   but we want to ensure it is enabled
+  logrotate_opts = if logrotate_options.include? 'sharedscripts'
+                     logrotate_options
+                   else
+                     (logrotate_options << 'sharedscripts')
+                   end
+
   # new_resource is redefined inside logrotate_app b/c it is a Custom Resource
   # This is a bit like JS' that = this silliness
   my = new_resource
   logrotate_app "mysql-#{new_resource.name}" do
-    sharedscripts true
     create        '640 mysql adm'
     path          ["/var/log/mysql-#{my.name}/mysql.log",
                    "/var/log/mysql-#{my.name}/mysql-slow.log",
                    "/var/log/mysql-#{my.name}/error.log"]
-    options       my.logrotate_options
+    options       logrotate_opts
     rotate        my.rotate
     frequency     my.frequency
     dateformat    my.dateformat if my.dateformat
