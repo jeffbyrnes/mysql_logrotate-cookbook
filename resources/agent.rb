@@ -19,7 +19,7 @@ action :create do
   mysql_database_user "logrotator for #{new_resource.name}" do
     connection new_resource.connection
     username   'logrotator'
-    password   mysql_password
+    password   new_resource.mysql_password
     privileges %w(USAGE RELOAD)
     action     %i(create grant)
   end
@@ -28,18 +28,18 @@ action :create do
     mode      '600'
     cookbook  'mysql_logrotate'
     variables username: 'logrotator',
-              password: mysql_password,
-              port:     connection[:port],
-              socket:   connection[:socket],
+              password: new_resource.mysql_password,
+              port:     new_resource.connection[:port],
+              socket:   new_resource.connection[:socket],
               host:     '127.0.0.1' # always local
   end
 
   # Specifying sharedscripts as a property of logrotate_app is deprecated,
   #   but we want to ensure it is enabled
-  logrotate_opts = if logrotate_options.include? 'sharedscripts'
-                     logrotate_options
+  logrotate_opts = if new_resource.logrotate_options.include? 'sharedscripts'
+                     new_resource.logrotate_options
                    else
-                     (logrotate_options << 'sharedscripts')
+                     (new_resource.logrotate_options << 'sharedscripts')
                    end
 
   # new_resource is redefined inside logrotate_app b/c it is a Custom Resource
