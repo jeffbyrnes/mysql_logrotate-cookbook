@@ -147,6 +147,9 @@ basedir  = /usr
 
 It turns out that the user for the `postrotate` script only needs to "ping" and "flush-logs", and you can do that with just the `USAGE` and `RELOAD` privileges.
 
-# Contributions...
+## License and Authors
 
-I whipped out this cookbook to solve a production problem, and it may not be a good universal solution. Believe me, you will not hurt anyone's feeling to raise issues, suggest changes, submit pull requests, fork this repo (or start over,) or otherwise come up with a better solution!
+- Author: Tom Wilson @flatrocks
+- Author: Jeff Byrnes thejeffbyrnes@gmail.com
+
+[MIT](LICENSE)
