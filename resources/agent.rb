@@ -2,7 +2,6 @@
 default_action :create
 
 # matches instance name of mysql_service
-property :name,              String, name_property: true
 property :mysql_password,    String,        required: true
 property :connection,        Hash,          required: true
 # logrotate options.  see logrotate_app docs for details

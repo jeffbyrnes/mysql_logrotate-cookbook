@@ -1,17 +1,26 @@
 ---
 driver:
-  name: vagrant
-  customize:
-    memory: 4096
+  name: dokken
+  privileged: true  # because Docker and SystemD/Upstart
+  chef_version: <%= ENV['CHEF_VERSION'] || 'current' %>
+
+transport:
+  name: dokken
 
 provisioner:
-  name: chef_zero
+  name: dokken
 
 verifier:
   name: inspec
+  deprecations_as_errors: true
 
 platforms:
   - name: ubuntu-16.04
+    driver:
+      image: dokken/ubuntu-16.04
+      pid_one_command: /bin/systemd
+      intermediate_instructions:
+        - RUN /usr/bin/apt-get update
 
 suites:
   - name: default

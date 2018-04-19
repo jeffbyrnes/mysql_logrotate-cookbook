@@ -1,0 +1,27 @@
+sudo: required
+dist: trusty
+addons:
+  apt:
+    sources:
+    - chef-current-trusty
+    packages:
+    - chefdk
+services: docker
+if: (type = pull_request) OR (tag IS present)
+env:
+  matrix:
+  - CHEF_VERSION=latest
+  - CHEF_VERSION=13
+  - CHEF_VERSION=12
+before_script:
+- sudo iptables -L DOCKER || ( echo "DOCKER iptables chain missing" ; sudo iptables -N DOCKER )
+- eval "$(chef shell-init bash)"
+- chef --version
+# Don't `bundle install` which takes about 1.5 mins
+install: echo "skip bundle install"
+script: kitchen verify ${INSTANCE}
+matrix:
+  include:
+  - script:
+    - chef exec delivery local verify
+    env: UNIT_AND_LINT=1
