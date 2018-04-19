@@ -1,15 +1,20 @@
 # mysql_logrotate
 
-Workaround for mysql logrotate issues introduced with mysql cookbook V6.0.0
+Workaround for MySQL logrotate issues introduced with mysql cookbook v6.0.0
 
 ## The problem and workaround
 
-The old (pre V6.0.0) mysql cookbook did a default installation of mysql server, which worked fine with `logrotate`. Starting with V6.0.0, the cookbook was reconfigured to allow installing multiple mysql instances.  This broke `logrotate` in a couple ways:
+The mysql cookbook < 6.0.0 does a default installation of mysql server, and includes a working `logrotate` config of its own.
 
-* The default `logrotate` setup was still created but it was set to rotate inactive logs, and the mysql user credentials (needed by the `logrotate` `postrotate` script to flush the logs) were not created.  (See _"What about the default logrotate setup that keeps failing?"_ for one solution.)
-* `logrotate` was not set up for the new MySQL server instances' logs (with the same issue regarding credentials.)
+Starting with V6.0.0, the cookbook was reconfigured to allow installing multiple mysql instances, and avoid managing the service provided by any package install.
 
-The intention of this cookbook is to implement working log rotation for any MySQL service created by `mysql` cookbook (> 6.0) by copying the implementation created for the older cookbooks where this worked.
+This broke `logrotate` for MySQL in a few ways:
+
+* The default `logrotate` setup is still created, but is set to rotate inactive logs, and the mysql user credentials (needed by the `logrotate` `postrotate` script to flush the logs) are not created.
+    - See _"What about the default logrotate setup that keeps failing?"_ for one solution.
+* `logrotate` is not set up for the new MySQL server instances' logs, with the same issue regarding credentials.
+
+The intention of this cookbook is to implement working log rotation for any MySQL service created by `mysql` cookbook (>= 6.0.0) by copying the implementation created for the older cookbooks where this worked.
 
 ## Resources
 
@@ -21,16 +26,16 @@ This resource is where everything happens:
 * The new database user credentials are saved in a file accessible to the `logrotate` `postrotate` script
 * A `logrotate` script is created to effect rotation
 
-#### Attributes
+#### Properties
 
 * `name` – This has to match the name used for the associated mysql_service instance.
 * `mysql_password` – Password for new mysql user created to enable flushing the logs in a postrotate script.
 * `connection` – This is a hash of the connection details required to create a new `mysql_database_user`.
     - Please refer to the database cookbook for details.
 
-#### `logrotate` attributes
+#### `logrotate` properties
 
-The following attributes are passed directly to the `logrotate` cookbook's `logrotate_app` definition. Note that some of the defaults set here are not the same as for `logrotate_app`, but are intended to create a `logrotate` setup like the default that was created for the old (pre v6) `mysql::server` recipe.
+The following properties are passed directly to the `logrotate` cookbook’s `logrotate_app` definition. Note that some of the defaults set here are not the same as for `logrotate_app`, but are intended to create a `logrotate` setup like the default that was created for the old (pre v6) `mysql::server` recipe.
 
 See NOTES for details.
 
@@ -41,27 +46,27 @@ See NOTES for details.
 * `maxsize, kind_of: String, required: false, default: nil`
 * `logrotate_options, kind_of: Array, required: false, default: ['missingok', 'compress']`
 
-#### Example
+## Usage
 
 ```ruby
-  # assume you have set up a mysql_service
-  mysql_service 'default' do
-    ... # see mysql cookbook >= v6.0 for details
-  end
+# assume you have set up a mysql_service
+mysql_service 'default' do
+  ... # see mysql cookbook >= v6.0 for details
+end
 
-  # create connection info as an external ruby hash (a la the database cookbook)
-  mysql_connection_info = {
-    host:     '127.0.0.1',
-    username: 'root',
-    password: 'the_default_service_root_password'
-  }
+# create connection info as an external ruby hash (a la the database cookbook)
+mysql_connection_info = {
+  host:     '127.0.0.1',
+  username: 'root',
+  password: 'the_default_service_root_password'
+}
 
-  # and set up the log rotation for your mysql service
-  mysql_logrotate_agent 'default' do
-    mysql_password 'the_logrotation_password'
-    connection     mysql_connection_info
-    action         :create
-  end
+# and set up the log rotation for your mysql service
+mysql_logrotate_agent 'default' do
+  mysql_password 'the_logrotation_password'
+  connection     mysql_connection_info
+  action         :create
+end
 ```
 
 ## What about the default `logrotate` setup that keeps failing?
@@ -74,9 +79,7 @@ logrotate_app 'mysql-server' do
 end
 ```
 
-## Limitations
-
-This was originally written for Ubuntu 14.04, and works well for 16.04. For other versions or flavors of Linux, YMMV.
+We leave it to the operator to do so, as they may have a differently-named default/unused MySQL service.
 
 ## NOTES
 
