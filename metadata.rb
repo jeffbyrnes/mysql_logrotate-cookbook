@@ -5,6 +5,12 @@ license          'MIT'
 description      'Installs/Configures log rotation for mysql_service (mysql cookbook > 6.0)'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 version          '0.2.2'
+chef_version     '>= 12.5'
+
+issues_url 'https://github.com/darkskyapp/mysql_logrotate-cookbook/issues'
+source_url 'https://github.com/darkskyapp/mysql_logrotate-cookbook'
+
+supports 'ubuntu', '>= 16.04'
 
 depends 'logrotate', '~> 2.1'
 depends 'mysql', '>= 6.0'
