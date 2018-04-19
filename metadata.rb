@@ -4,7 +4,7 @@ maintainer_email 'thejeffbyrnes@gmail.com'
 license          'MIT'
 description      'Installs/Configures log rotation for mysql_service (mysql cookbook > 6.0)'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version          '0.2.2'
+version          '1.0.0'
 chef_version     '>= 12.5'
 
 issues_url 'https://github.com/darkskyapp/mysql_logrotate-cookbook/issues'
