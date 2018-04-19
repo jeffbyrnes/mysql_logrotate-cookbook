@@ -1,10 +1,12 @@
 name             'mysql_logrotate'
 maintainer       'Roll No Rocks LLC'
 maintainer_email 'tom@rollnorocks.com'
+license          'MIT'
 description      'Installs/Configures log rotation for mysql_service (mysql cookbook > 6.0)'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 version          '0.2.2'
 
-depends 'logrotate', '~> 1.7'
+depends 'logrotate', '~> 2.1'
 depends 'mysql', '>= 6.0'
 depends 'database'
+depends 'mysql2_chef_gem'

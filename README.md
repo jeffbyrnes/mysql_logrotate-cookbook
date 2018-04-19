@@ -4,103 +4,96 @@ Workaround for mysql logrotate issues introduced with mysql cookbook V6.0.0
 
 ## The problem and workaround
 
-The old (pre V6.0.0) mysql cookbook did a default installation of mysql server,
-which worked fine with logrotate.
-Starting with V6.0.0, the cookbook was reconfigured to allow installing
-multiple mysql instances.  This broke logrotate in a couple ways:
-* The default logrotate setup was still created but it was set to rotate inactive logs,
-and the mysql user credentials (needed by the logrotate postrotate script to flush the logs)
-were not created.  (See _"What about the default logrotate setup that keeps failing?"_ for one solution.)
-* Logrotate was not set up for the new mysql server instances' logs
-(with the same issue regarding credentials.)
+The old (pre V6.0.0) mysql cookbook did a default installation of mysql server, which worked fine with `logrotate`. Starting with V6.0.0, the cookbook was reconfigured to allow installing multiple mysql instances.  This broke `logrotate` in a couple ways:
 
-The intention of this cookbook is to implement working log rotation for any
-mysql service created by mysql cookbook (> 6.0) by copying the implementation
-created for the older cookbooks where this worked.
+* The default `logrotate` setup was still created but it was set to rotate inactive logs, and the mysql user credentials (needed by the `logrotate` `postrotate` script to flush the logs) were not created.  (See _"What about the default logrotate setup that keeps failing?"_ for one solution.)
+* `logrotate` was not set up for the new MySQL server instances' logs (with the same issue regarding credentials.)
+
+The intention of this cookbook is to implement working log rotation for any MySQL service created by `mysql` cookbook (> 6.0) by copying the implementation created for the older cookbooks where this worked.
 
 ## Resources
 
-### mysql_logrotate_agent
+### `mysql_logrotate_agent`
 
 This resource is where everything happens:
-* a new database user is created to enable mysql log flushing
-* the new database user credentials are saved in a file accessible to the logrotate postrotate script
-* a new logrotate script is created to effect rotation
 
-**Attributes**
-* name, kind_of: String, name_attribute: true.  This has to match the name used for the associated mysql_service instance.
-* mysql_password, kind_of: String, required: true. Password for new mysql user created to enable flushing the logs in a postrotate script.
-* connection, kind_of: Hash, required: true. This is the connection required to create a new mysql_database_user.
-Please refer to teh database cookbook for details.
+* A database user is created to enable MySQL log flushing
+* The new database user credentials are saved in a file accessible to the `logrotate` `postrotate` script
+* A `logrotate` script is created to effect rotation
 
-**Logrotate attributes**
+#### Attributes
 
-_The following attributes are passed directly to the logrotate cookbook's logrotate_app definition.
-Note that some of the defaults set here are not the same as for logrotate_app,
-but are intended to create a logrotate setup like the default that was created for the old (pre v6) mysql::server recipe.
-See NOTES for details._
-* rotate, kind_of: Integer, required: false, default: 7
-* frequency, kind_of: String, required: false, default: 'daily'
-* dateformat, kind_of: String, required: false, default: nil
-* size, kind_of: String, required: false, default: nil
-* maxsize, kind_of: String, required: false, default: nil
-* logrotate_options, kind_of: Array, required: false, default: ['missingok', 'compress']
+* `name` – This has to match the name used for the associated mysql_service instance.
+* `mysql_password` – Password for new mysql user created to enable flushing the logs in a postrotate script.
+* `connection` – This is a hash of the connection details required to create a new `mysql_database_user`.
+    - Please refer to the database cookbook for details.
 
-**Example**
+#### `logrotate` attributes
 
-``` ruby
+The following attributes are passed directly to the `logrotate` cookbook's `logrotate_app` definition. Note that some of the defaults set here are not the same as for `logrotate_app`, but are intended to create a `logrotate` setup like the default that was created for the old (pre v6) `mysql::server` recipe.
+
+See NOTES for details.
+
+* `rotate, kind_of: Integer, required: false, default: 7`
+* `frequency, kind_of: String, required: false, default: 'daily'`
+* `dateformat, kind_of: String, required: false, default: nil`
+* `size, kind_of: String, required: false, default: nil`
+* `maxsize, kind_of: String, required: false, default: nil`
+* `logrotate_options, kind_of: Array, required: false, default: ['missingok', 'compress']`
+
+#### Example
+
+```ruby
   # assume you have set up a mysql_service
   mysql_service 'default' do
     ... # see mysql cookbook >= v6.0 for details
   end
-  # create connection info as an external ruby has (a la the database cookbook)
+
+  # create connection info as an external ruby hash (a la the database cookbook)
   mysql_connection_info = {
-    :host     => '127.0.0.1',
-    :username => 'root',
-    :password => 'the_default_service_root_password'
+    host:     '127.0.0.1',
+    username: 'root',
+    password: 'the_default_service_root_password'
   }
+
   # and set up the log rotation for your mysql service
   mysql_logrotate_agent 'default' do
     mysql_password 'the_logrotation_password'
-    connection mysql_connection_info
-    action :create
+    connection     mysql_connection_info
+    action         :create
   end
 ```
 
-## What about the default logrotate setup that keeps failing?
+## What about the default `logrotate` setup that keeps failing?
 
-You can probably disable the failing default (and unused) mysql logrotate script with this:
-``` ruby
+You can disable the failing default (and unused) MySQL `logrotate` script like so:
+
+```ruby
 logrotate_app 'mysql-server' do
   enable false
 end
 ```
-(It worked for me.)
 
 ## Limitations
 
-This is for current needs so I just wrote if for Ubuntu 14.04.
-If you want to use it on another platform, hopefully this will be a good headstart.
-
-Also note that this cookbook relies heavily on implementation details of the mysql_server resource
-(mysql cookbook.)
-
+This was originally written for Ubuntu 14.04, and works well for 16.04. For other versions or flavors of Linux, YMMV.
 
 ## NOTES
 
-The "old" setup was verified by running up a vagrant box and including just
-* mysql cookbook 5.6.3
-* logrotate cookbook
+The "old" setup was verified by standing up a VM using:
 
-with some dummy attributes.
+* `mysql = 5.6.3`
+* `logrotate ~> 1.5`
 
 ### Key elements:
 
 The log rotation script was created here:
 
-```-rw-r--r-- 1 root root 847 Jan 21 21:31 /etc/logrotate.d/mysql-server```
-
+```bash
+-rw-r--r-- 1 root root 847 Jan 21 21:31 /etc/logrotate.d/mysql-server
 ```
+
+```bash
 # - I put everything in one block and added sharedscripts, so that mysql gets
 #   flush-logs'd only once.
 #   Else the binary logs would automatically increase by n times every day.
@@ -129,11 +122,13 @@ The log rotation script was created here:
 }
 ```
 
-It depends on the /etc/mysql/debian.cnf file, created here:
+It depends on the `/etc/mysql/debian.cnf` file, created here:
 
-```-rw------- 1 root root 333 Apr 13 14:27 /etc/mysql/debian.cnf```
-
+```bash
+-rw------- 1 root root 333 Apr 13 14:27 /etc/mysql/debian.cnf
 ```
+
+```bash
 # Automatically generated for Debian scripts. DO NOT TOUCH!
 [client]
 host     = localhost
@@ -148,13 +143,10 @@ socket   = /var/run/mysqld/mysqld.sock
 basedir  = /usr
 ```
 
-**mysql privileges**
+#### MySQL privileges
 
-It turns out that the user for the postrotate script only needs to "ping" and "flush-logs",
-and you can do that with only the "usage" and "reload" privileges.
+It turns out that the user for the `postrotate` script only needs to "ping" and "flush-logs", and you can do that with just the `USAGE` and `RELOAD` privileges.
 
 # Contributions...
 
-I whipped out this cookbook to solve a production problem, and it may not be a good universal solution.
-Believe me, you will not hurt anyone's feeling to raise issues, suggest changes, submit pull requests,
-fork this repo (or start over,) or otherwise come up with a better solution!
+I whipped out this cookbook to solve a production problem, and it may not be a good universal solution. Believe me, you will not hurt anyone's feeling to raise issues, suggest changes, submit pull requests, fork this repo (or start over,) or otherwise come up with a better solution!
