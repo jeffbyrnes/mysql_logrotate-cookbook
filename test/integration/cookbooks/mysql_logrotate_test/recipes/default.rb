@@ -4,11 +4,13 @@
 #
 
 mysql_service 'default' do
+  version               '5.7'
   initial_root_password 'fake_root_password'
   action                %i(create start)
 end
 
 mysql_service 'extra' do
+  version               '5.7'
   port                  '3307'
   initial_root_password 'fake_root_password'
   action                %i(create start)

@@ -3,6 +3,8 @@ default_action :create
 
 # matches instance name of mysql_service
 property :mysql_password,    String,        required: true
+property :mysql_version,     String,        default: '5.7'
+property :gem_version,       String,        default: '0.5.1'
 property :connection,        Hash,          required: true
 # logrotate options.  see logrotate_app docs for details
 property :rotate,            Integer,       default: 7
@@ -13,7 +15,10 @@ property :maxsize,           [String, nil], default: nil
 property :logrotate_options, Array,         default: %w(missingok compress sharedscripts)
 
 action :create do
-  mysql2_chef_gem 'default'
+  mysql2_chef_gem 'default' do
+    gem_version new_resource.gem_version
+    package_version new_resource.mysql_version
+  end
 
   mysql_database_user "logrotator for #{new_resource.name}" do
     connection new_resource.connection
